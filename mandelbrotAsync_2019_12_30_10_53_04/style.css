@@ -1,0 +1,26 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+canvas {
+  display: block;
+}
+p {
+  width: 25ch;
+  margin: 3px;
+  background: #fff;
+  font: #000;
+}
+body {
+  font-family: monospace;
+  font: 15px;
+}
+body{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  cursor: cell;
+}
