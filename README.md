@@ -1,4 +1,4 @@
-# mandelbrot
+# js mandelbrot viewer
 
 Enjoy patterns of nature! The viewer provides minimalistic design, intuitive functionality and easy to use interface.
 
