@@ -1,3 +1,9 @@
+/* @author 
+ * 
+ * @3bute <fiedelferro@gmail.com>
+ *
+ */
+
 var ax,
   ay,
   w,
