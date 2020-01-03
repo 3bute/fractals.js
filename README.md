@@ -1,7 +1,9 @@
 # js mandelbrot viewer
 
+normal precision: https://mbset.glitch.me
+arbitrary precision: https://mbsetp.glitch.me
 
-https://editor.p5js.org/alexx/present/OPRj8Jr-o
+Due to the calculation overhead the arbitrary precision is much slower, use normal instead.
 
 Enjoy patterns of nature! The viewer provides minimalistic design, intuitive functionality and easy to use interface.
 
@@ -13,5 +15,3 @@ Enjoy patterns of nature! The viewer provides minimalistic design, intuitive fun
 
 - Full control over significant parameters such resolution, iterations, magnification, color, number of threads etc.
 - Multithreaded environment
-
-Current precision is the standard js 64-bit. Implementing bigfloat is planned. 
