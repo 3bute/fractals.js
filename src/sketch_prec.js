@@ -484,26 +484,26 @@ function getPoints(it, xstt, ystt, xend, yend) {
   var wi = width / degrad;
   var he = height / degrad;
   proc = [];
-  for (let i = 0; i < workers; i++) {
-    var y0 = mapFloat(i, 0, workers, 0, height / degrad).toFixed(0);
-    var y1 = mapFloat(i + 1, 0, workers, 0, height / degrad).toFixed(0);
-    var a2 = mapFloat(i, 0, workers, ystt, yend);
-    var a4 = mapFloat(i + 1, 0, workers, ystt, yend);
+  for (let i = 0; i < he; i++) {
+    var a2 = mapFloat(i, 0, he, ystt, yend);
+    var a4 = mapFloat(i + 1, 0, he, ystt, yend);
+    var yprio = Math.abs(i - he/2);
     for (let j = 0; j < workers; j++) {
-      var x0 = mapFloat(j, 0, workers, 0, width / degrad).toFixed(0);
-      var x1 = mapFloat(j + 1, 0, workers, 0, width / degrad).toFixed(0);
+      var x0 = mapFloat(j, 0, workers, 0, wi);
+      var x1 = mapFloat(j+1, 0, workers, 0, wi);
       var a1 = mapFloat(j, 0, workers, xstt, xend);
       var a3 = mapFloat(j + 1, 0, workers, xstt, xend);
-      proc.push({x0: x0, y0: y0, x1: x1, y1: y1, it: it, a1: a1, a2: a2, a3: a3, a4: a4});
-     // stuff(x0, y0, x1, y1, it, a1, a2, a3, a4);
+      var xprio = Math.abs(j - workers/2)*he/workers;
+      var prio = Math.sqrt(Math.pow(xprio, 2) + Math.pow(yprio, 2)).toFixed(1);
+      proc.push({prio: prio, x0: x0, y0: i, x1: x1, y1: i + 1, it: it, a1: a1, a2: a2, a3: a3, a4: a4});
     }
   }
-  let len = proc.length;
-  for (let i = 0; i<len; i++){
-    let j = Math.round(Math.random()*(proc.length-1));
-    let {x0, y0, x1, y1, it, a1, a2, a3, a4} = proc[j];
+  proc = proc.sort((a,b)=>{
+    return a.prio - b.prio;
+  });
+  for (let i = 0; i<proc.length; i++){
+    let {x0, y0, x1, y1, it, a1, a2, a3, a4} = proc[i];
     stuff(x0, y0, x1, y1, it, a1, a2, a3, a4);
-    proc.splice(j,1);
   }
 }
 
@@ -511,10 +511,11 @@ function stuff(x0, y0, x1, y1, it, xstt, ystt, xend, yend) {
   setTimeout(() => {
     if (stop) {
       done++;
-      if (done == workers * workers) {
+      if (done == proc.length) {
         busy = false;
         unshow();
         stop = false;
+	proc = null;
       }
       return;
     }
@@ -553,9 +554,10 @@ function stuff(x0, y0, x1, y1, it, xstt, ystt, xend, yend) {
       }
     }
     done++;
-    if (done == workers * workers) {
+    if (done == proc.length) {
       unshow();
       busy = false;
+      proc = null;
     }
   }, 0);
 }
@@ -575,17 +577,9 @@ class Complex {
     this.Re = r;
     this.Im = i;
   }
-
-  getRe() {
-    return this.Re;
-  }
-  getIm() {
-    return this.Im;
-  }
-  getR() {
-    this.updateR();
-    return this.R;
-  }
+  getRe() {return this.Re;}
+  getIm() {return this.Im;}
+  getR() {this.updateR();return this.R;}
 
   add(Complex) {
     this.Re = new BigNumber(this.Re.plus( Complex.getRe() ).toFixed(prec));
@@ -602,10 +596,6 @@ class Complex {
 
   updateR() {
     //this.R = new BigNumber(this.Re.pow(2).toFixed(prec)).plus( new BigNumber(this.Im.pow(2).toFixed(prec))).sqrt();
-    this.R = new BigNumber( this.Re.pow(2).plus(this.Im.pow(2)).sqrt().toFixed(prec));
-  }
-
-  toString() {
-    return this.Re.toString() + /*(this.Im.isGreaterThan(0)) ? '+' : ''*/ +' ' + this.Im.toString();
+    this.R = this.Re.pow(2).plus(this.Im.pow(2)).sqrt();
   }
 }
