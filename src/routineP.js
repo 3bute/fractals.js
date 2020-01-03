@@ -59,7 +59,7 @@ function getPointsP(it, xstt, ystt, xend, yend) {
   done = 0;
   var wi = width / degrad;
   var he = height / degrad;
-  proc = [];
+  proc = []
   for (let i = 0; i < he; i++) {
     var a2 = mapFloat(i, 0, he, ystt, yend);
     var a4 = mapFloat(i + 1, 0, he, ystt, yend);

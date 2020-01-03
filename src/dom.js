@@ -339,11 +339,11 @@ function createControls() {
   dev1.style.position = "absolute";
   dev1.style.padding = "3px";
   dev1.style.margin = "0px";
-  dev1.style.left = innerWidth / 2 - 45 + "px";
-  dev1.style.top = innerHeight / 2 - 10 + "px";
+  dev1.style.left = "8px";
+  dev1.style.bottom = "8px";
   dev1.style.display = "none";
-  dev1.innerHTML = "Calculation..";
-  
+  dev1.innerHTML = "<span>Calculation..</span>"+
+                   "<span>Press <b>x</b> to stop.</span>";
   dev4 = document.createElement("div");
   dev4.style.background = "rgba(125, 125, 125, 0.1)";
   dev4.style.position = "absolute";
