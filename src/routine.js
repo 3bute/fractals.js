@@ -37,7 +37,7 @@ function makeSet() {
   ystt = map(ay, 0, height, crd.y0, crd.y1);
   xend = map(ax + w, 0, width, crd.x0, crd.x1);
   yend = map(ay + h, 0, height, crd.y0, crd.y1);
-  if (Math.abs((xend - xstt)/(ystt - yend) - width/height) > 0.0001) {
+  if (Math.abs((xend - xstt)/(ystt - yend) - width/height) > 0.01) {
     switchP();    
     alert('switched to high precision, the speed will drop significantly :\(');
     return ;

@@ -27,8 +27,10 @@ function makeSetP() {
   ystt = mapFloat(ay, 0, height, crd.y0, crd.y1);
   xend = mapFloat(new BigNumber(ax).plus(w), 0, width, crd.x0, crd.x1);
   yend = mapFloat(new BigNumber(ay).plus(h), 0, height, crd.y0, crd.y1);
-  if (Math.abs((xend - xstt)/(ystt - yend) - width/height) > 0.0001) {
-   setPrecision(prec+=2);
+  var delta =  xend.minus(xstt).div(ystt.minus(yend)).minus(width/height).toFixed(4);
+  if (Math.abs(Number(delta))>0.001 ) {
+    prec+=2;
+    setPrecision(prec);
   }
   coords.push({ x0: xstt, y0: ystt, x1: xend, y1: yend });
   dropSetP();

@@ -211,6 +211,12 @@ document.addEventListener("keydown", event => {
     switchP();    
     return ;
   }
+  if (event.keyCode == 87){
+    prec++;
+  }
+  if (event.keyCode == 83){
+    if (prec>1) prec--;
+  }
 });
 
 function checkColor() {
