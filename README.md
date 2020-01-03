@@ -1,6 +1,7 @@
 # js mandelbrot viewer
 
 normal precision: https://mbset.glitch.me
+
 arbitrary precision: https://mbsetp.glitch.me
 
 Due to the calculation overhead the arbitrary precision is much slower, use normal instead.
