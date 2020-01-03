@@ -35,11 +35,13 @@ var ax,
   prevColors = null,
   bw = false,
   dark = false,
-  workers = 8,
+  workers = 1,
   busy = false,
   stop = false,
   magnif = false,
-  h0 = 0, w0 = 0;
+  h0 = 0, w0 = 0,
+  prec = 8,
+  proc;
 
 function show() {
   dev1.style.display = "block";
@@ -213,15 +215,22 @@ document.addEventListener("keydown", event => {
       var crd = coords[coords.length-1];
       var delH = (height - h0)/2;
       var delW = (width - w0)/2;
-      crd.x0 = crd.x0 - delW*(crd.x1-crd.x0)/w0;
-      crd.y0 = crd.y0 - delH*(crd.y1-crd.y0)/h0;
-      crd.x1 = crd.x1 + delW*(crd.x1-crd.x0)/w0;
-      crd.y1 = crd.y1 + delH*(crd.y1-crd.y0)/h0;
+      crd.x0 = crd.x0.minus( new BigNumber(delW).times( (crd.x1.minus(crd.x0)).div(w0)));
+      crd.y0 = crd.y0.minus( new BigNumber(delH).times( (crd.y1.minus(crd.y0)).div(h0)));
+      crd.x1 = crd.x1.plus( new BigNumber(delW).times( (crd.x1.minus(crd.x0)).div(w0)));
+      crd.y1 = crd.y1.plus( new BigNumber(delH).times( (crd.y1.minus(crd.y0)).div(h0)));
       dropSet();
       w0 = width;
       h0 = height;
     }, 300);
     return;
+  }
+  if (event.keyCode == 87){
+    setPrecision(prec++);
+  }
+  if (event.keyCode == 83){
+    if (prec<0) return ;
+    setPrecision(prec--);
   }
 });
 
@@ -230,6 +239,10 @@ function checkColor() {
   prevColors.Hue = Hue;
   prevColors.sat = sat;
   prevColors.Value = Value;
+}
+
+function setPrecision(p){
+  BigNumber.set({ DECIMAL_PLACES: p });
 }
 
 function drawMagnifier(){
@@ -247,21 +260,23 @@ function drawMagnifier(){
 }
 
 function setup() {
-  console.log(innerWidth, innerHeight);
+  console.log('Current Resolution: ' + innerWidth + 'x' +  innerHeight);
   cvs = createCanvas(windowWidth, windowHeight);
+  BigNumber.set({ DECIMAL_PLACES: prec });	
   h0 = height;
   w0 = width;
   scl = 2;
   w = width / scl;
   h = height / scl;
-  iter = 100;
+  iter = 50;
   degrad = 10;
-  coords.push({ x0: -3, x1: 3 });
+  workers = 16;
+  coords.push({ x0: new BigNumber(-3.0), x1: new BigNumber(3.0) });
   var crd = coords[0];
-  var xlen = crd.x1 - crd.x0;
-  var ylen = (xlen * height) / width;
-  crd.y1 = -ylen / 2;
-  crd.y0 = ylen / 2;
+  var xlen = crd.x1.minus(crd.x0);
+  var ylen = xlen.times(height).div(width);
+  crd.y1 = ylen.times(-1).div(2);
+  crd.y0 = ylen.div(2);
   createControls();
   dropSet();
   setTimeout(() => (dev3.style.display = "none"), 10000);
@@ -277,7 +292,7 @@ function createControls() {
     if (event.button == 1) {
       midbutton = true;
       if (coords.length > 1) coords.pop();
-      if (zoomed>1) zoomed -= scl;
+      if (zoomed>2) zoomed -= scl;
       dropSet();
       setTimeout(() => (midbutton = false), 500);
     }
@@ -297,36 +312,35 @@ function createControls() {
     ay = y - height / scl / 2;
     drawMagnifier();
     
-    var currentX = map(
+    var currentX = mapFloat(
       x,
       0,
       width,
       coords[coords.length - 1].x0,
       coords[coords.length - 1].x1
     );
-    var currentY = map(
+    var currentY = mapFloat(
       y,
       0,
       height,
       coords[coords.length - 1].y0,
       coords[coords.length - 1].y1
     );
-    updateInformation(currentX, currentY);
+    updateInformation(currentX.toString(), currentY.toString());
 
     if (mouseIsPressed && dragged) {
       var crd = coords[coords.length - 1];
       if (oldMouseX && oldMouseY) {
-        var xRem = map(oldMouseX - mouseX, 0, width, 0, crd.x1 - crd.x0);
-        var yRem = map(oldMouseY - mouseY, 0, height, 0, crd.y1 - crd.y0);
-        var xstt = crd.x0 + xRem;
-        var ystt = crd.y0 + yRem;
-        var xend = crd.x1 + xRem;
-        var yend = crd.y1 + yRem;
+        var xRem = mapFloat(oldMouseX - mouseX, 0, width, 0, crd.x1.minus(crd.x0));
+        var yRem = mapFloat(oldMouseY - mouseY, 0, height, 0, crd.y1.minus(crd.y0));
+        var xstt = crd.x0.plus(xRem);
+        var ystt = crd.y0.plus(yRem);
+        var xend = crd.x1.plus(xRem);
+        var yend = crd.y1.plus(yRem);
         oldMouseX = mouseX;
         oldMouseY = mouseY;
         coords.push({ x0: xstt, y0: ystt, x1: xend, y1: yend });
         dropSet(true);
-        var toDel = coords[coords.length - 2];
         coords[coords.length - 2] = coords[coords.length - 1];
         coords.pop();
       } else {
@@ -378,27 +392,21 @@ function createControls() {
   dev4.style.display = "none";
   dev4.style.border = '1px solid #888';
 
-  dev3.children[1].innerHTML =
-      "<p>press <b>o</b>/<b>l</b> to change resolution</p>";
-  dev3.children[2].innerHTML =
-      "<p>press <b>k</b>/<b>i</b> to change iterations</p>";
+  dev3.children[1].innerHTML = "<p>press <b>o</b>/<b>l</b> to change resolution</p>";
+  dev3.children[2].innerHTML = "<p>press <b>k</b>/<b>i</b> to change iterations</p>";
   dev3.children[7].innerHTML = "<p>hold <b>ctrl</b> to drag</p>";
-  dev3.children[3].innerHTML =
-      "<p>press <b>c</b>/<b>v</b> to change magnification</p>";
+  dev3.children[3].innerHTML = "<p>press <b>c</b>/<b>v</b> to change magnification</p>";
   dev3.children[4].innerHTML = "<p>press <b>d</b> to save in .jpg</p>";
-  dev3.children[5].innerHTML =
-      "<p>press <b>g</b>, <b>h</b>, <b>j</b> to change saturation, delta hue, value</p>";
+  dev3.children[5].innerHTML = "<p>press <b>g</b>, <b>h</b>, <b>j</b> to change saturation, delta hue, value</p>";
   dev3.children[0].innerHTML = "<p>press <b>e</b> to close/open help div</p>";
-  dev3.children[8].innerHTML =
-      "<p>press <b>mid mouse button</b> to go one step back</p>";
-  dev3.children[10].innerHTML =
-      "<p>press <b>1</b> to enter black&white mode</p>";
+  dev3.children[8].innerHTML = "<p>press <b>mid mouse button</b> to go one step back</p>";
+  dev3.children[10].innerHTML = "<p>press <b>1</b> to enter black&white mode</p>";
   dev3.children[11].innerHTML = "<p>press <b>2</b> to enter dark mode</p>";
-  dev3.children[12].innerHTML =
-      "<p>press <b>q</b>/<b>a</b> to change the number of workers</p>";
+  dev3.children[12].innerHTML = "<p>press <b>q</b>/<b>a</b> to change the number of workers</p>";
   dev3.children[13].innerHTML = "<p>press <b>x</b> to kill current job</p>";
   dev3.children[14].innerHTML = '<p>press <b>u</b> to update image</p>';
-  
+  dev3.children[15].innerHTML = '<p>press <b>w</b>/<b>s</b> to change precision</p>';
+
   this.document.body.appendChild(dev0);
   this.document.body.appendChild(dev1);
   this.document.body.appendChild(dev3);
@@ -411,18 +419,21 @@ function makeSet() {
   var xstt = crd.x0;
   var xend = crd.x1;
   var ystt = crd.y0;
-  var h = height / scl,
-    w = width / scl;
-  var xlen = crd.x1 - crd.x0;
-  var ylen = (xlen * h) / w;
-  var yend = ystt - ylen;
+  var h = new BigNumber(height).div(scl),
+      w = new BigNumber(width).div(scl);
+  var xlen = crd.x1.minus(crd.x0);
+  var ylen = xlen.times(h).div(w);
+  var yend = ystt.minus(ylen);
   crd.y1 = yend;
-  xstt = map(ax, 0, width, crd.x0, crd.x1);
-  ystt = map(ay, 0, height, crd.y0, crd.y1);
-  xend = map(ax + w, 0, width, crd.x0, crd.x1);
-  yend = map(ay + h, 0, height, crd.y0, crd.y1);
-  if (Math.abs((xend - xstt)/(ystt - yend) - width/height) > 0.2) alert('resolution error!');
+  
+  xstt = mapFloat(ax, 0, width, crd.x0, crd.x1);
+  ystt = mapFloat(ay, 0, height, crd.y0, crd.y1);
+  xend = mapFloat(new BigNumber(ax).plus(w), 0, width, crd.x0, crd.x1);
+  yend = mapFloat(new BigNumber(ay).plus(h), 0, height, crd.y0, crd.y1);
+  
+  //if (Math.abs((xend - xstt)/(ystt - yend) - width/height) > 0.2) alert('resolution error!');
   coords.push({ x0: xstt, y0: ystt, x1: xend, y1: yend });
+
   dropSet();
 }
 
@@ -455,8 +466,6 @@ function updateInformation(currentX, currentY) {
     dev0.children[7].innerHTML = "<p>Delta Hue: " + Hue + "</p>";
     dev0.children[8].innerHTML = "<p>Value: " + Value + "</p>";
     dev0.children[9].innerHTML = "<p>Workers: " + workers + "</p>";
-
-
   }
 }
 
@@ -474,19 +483,19 @@ function getPoints(it, xstt, ystt, xend, yend) {
   done = 0;
   var wi = width / degrad;
   var he = height / degrad;
-  var proc = [];
+  proc = [];
   for (let i = 0; i < workers; i++) {
-    var y0 = Math.round(map(i, 0, workers, 0, height / degrad));
-    var y1 = Math.round(map(i + 1, 0, workers, 0, height / degrad));
-    var a2 = map(i, 0, workers, ystt, yend);
-    var a4 = map(i + 1, 0, workers, ystt, yend);
+    var y0 = mapFloat(i, 0, workers, 0, height / degrad).toFixed(0);
+    var y1 = mapFloat(i + 1, 0, workers, 0, height / degrad).toFixed(0);
+    var a2 = mapFloat(i, 0, workers, ystt, yend);
+    var a4 = mapFloat(i + 1, 0, workers, ystt, yend);
     for (let j = 0; j < workers; j++) {
-      var x0 = Math.round(map(j, 0, workers, 0, width / degrad));
-      var x1 = Math.round(map(j + 1, 0, workers, 0, width / degrad));
-      var a1 = map(j, 0, workers, xstt, xend);
-      var a3 = map(j + 1, 0, workers, xstt, xend);
-      //stuff(x0, y0, x1, y1, it, a1, a2, a3, a4);
+      var x0 = mapFloat(j, 0, workers, 0, width / degrad).toFixed(0);
+      var x1 = mapFloat(j + 1, 0, workers, 0, width / degrad).toFixed(0);
+      var a1 = mapFloat(j, 0, workers, xstt, xend);
+      var a3 = mapFloat(j + 1, 0, workers, xstt, xend);
       proc.push({x0: x0, y0: y0, x1: x1, y1: y1, it: it, a1: a1, a2: a2, a3: a3, a4: a4});
+     // stuff(x0, y0, x1, y1, it, a1, a2, a3, a4);
     }
   }
   let len = proc.length;
@@ -509,16 +518,20 @@ function stuff(x0, y0, x1, y1, it, xstt, ystt, xend, yend) {
       }
       return;
     }
+    x0 = parseInt(x0);
+    y0 = parseInt(y0);
+    x1 = parseInt(x1);
+    y1 = parseInt(y1);
     for (var x = x0; x < x1; x++) {
       for (var y = y0; y < y1; y++) {
-        let z = new Complex(0, 0);
-        var i = map(x, x0, x1, xstt, xend);
-        var j = map(y, y0, y1, ystt, yend);
-        let c = new Complex(i, j);
-        for (var k = 0; k < it; k++) {
+        var z = new Complex(new BigNumber(0.0), new BigNumber(0.0));
+	var i = mapFloat(x, x0, x1, xstt, xend);
+        var j = mapFloat(y, y0, y1, ystt, yend);
+	var c = new Complex(i, j);
+	for (var k = 0; k < it; k++) {
 	  z = z.square();
           z = z.add(c);
-          if (z.getR() > 2) {
+          if ( z.getR().isGreaterThan(2) ) {
             if (bw) {
               colorMode(RGB, 255);
               var gradient = (k / it) * 255;
@@ -533,7 +546,7 @@ function stuff(x0, y0, x1, y1, it, xstt, ystt, xend, yend) {
               fill(hue, sat, Value);
               noStroke();
               rect(x * degrad, y * degrad, degrad, degrad);
-             break;
+              break;
             }
           }
         }
@@ -545,6 +558,16 @@ function stuff(x0, y0, x1, y1, it, xstt, ystt, xend, yend) {
       busy = false;
     }
   }, 0);
+}
+
+function mapFloat(a, b, c, d, e){
+  var s0 = new BigNumber(b);
+  var e0 = new BigNumber(c);
+  var s1 = new BigNumber(d);
+  var e1 = new BigNumber(e);
+  var v = new BigNumber(a);
+  //return new BigNumber( new BigNumber(v.minus(s0).toFixed(prec)).div( new BigNumber(e0.minus(s0).toFixed(prec))).times( new BigNumber(e1.minus(s1).toFixed(prec))).plus(s1).toFixed(prec));
+  return new BigNumber(v.minus(s0).div(e0.minus(s0)).times(e1.minus(s1)).plus(s1).toFixed(prec));
 }
 
 class Complex {
@@ -565,19 +588,24 @@ class Complex {
   }
 
   add(Complex) {
-    this.Re += Complex.getRe();
-    this.Im += Complex.getIm();
+    this.Re = new BigNumber(this.Re.plus( Complex.getRe() ).toFixed(prec));
+    this.Im = new BigNumber(this.Im.plus( Complex.getIm() ).toFixed(prec));
     return this;
   }
 
   square() {
     let tempIm = this.Im;
-    this.Im = this.Re * this.Im + this.Im * this.Re;
-    this.Re = this.Re * this.Re - tempIm * tempIm;
+    this.Im = new BigNumber(this.Re.times(this.Im).toFixed(prec)).plus( new BigNumber(this.Im.times(this.Re).toFixed(prec)));
+    this.Re = new BigNumber(this.Re.pow(2).toFixed(prec)).minus( new BigNumber(tempIm.pow(2).toFixed(prec)));
     return this;
   }
 
   updateR() {
-    this.R = Math.sqrt(Math.pow(this.Re, 2) + Math.pow(this.Im, 2));
+    //this.R = new BigNumber(this.Re.pow(2).toFixed(prec)).plus( new BigNumber(this.Im.pow(2).toFixed(prec))).sqrt();
+    this.R = new BigNumber( this.Re.pow(2).plus(this.Im.pow(2)).sqrt().toFixed(prec));
+  }
+
+  toString() {
+    return this.Re.toString() + /*(this.Im.isGreaterThan(0)) ? '+' : ''*/ +' ' + this.Im.toString();
   }
 }
