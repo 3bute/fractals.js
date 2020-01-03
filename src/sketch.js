@@ -58,5 +58,5 @@ function setup() {
   crd.y0 = ylen / 2;
   createControls();
   dropSet();
-  setTimeout(() => (dev3.style.display = "none"), 10000);
+  setTimeout(() => (dev3.style.display = "none"), 20000);
 }

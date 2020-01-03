@@ -6,10 +6,13 @@ canvas {
   display: block;
 }
 p {
-  width: 25ch;
-  margin: 3px;
-  background: #fff;
+  width: 33ch;
+  margin: 10px;
   font: #000;
+}
+span {
+  padding: 2px;
+  background: #fff;
 }
 body {
   font-family: monospace;

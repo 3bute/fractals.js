@@ -197,23 +197,17 @@ document.addEventListener("keydown", event => {
       }, 300);
     return;
   }
-  
-  if (event.keyCode == 87){
-    setPrecision(prec++);
-    dropSetP();
-  }
-  
-  if (event.keyCode == 83){
-    if (prec<0) return ;
-    setPrecision(prec--);
-    dropSetP();
-  }
   if (event.keyCode == 80 ) { 
     dev0.style.position = "absolute";
     dev0.style.padding = "0px";
     dev0.style.margin = "0px";
     dev0.style.left = "8px";
     dev0.style.top = "8px";
+    dev0.innerHTML = '';
+    for (var i = 0; i < 20; i++) {
+      let p = document.createElement("p");
+      dev0.appendChild(p);
+    }
     switchP();    
     return ;
   }
@@ -317,7 +311,7 @@ function createControls() {
   dev0.style.top = "8px";
 
   for (var i = 0; i < 20; i++) {
-    var p = document.createElement("p");
+    let p = document.createElement("p");
     dev0.appendChild(p);
   }
 
@@ -352,26 +346,27 @@ function createControls() {
   dev4.style.border = '1px solid #888';
 
   dev3.children[1].innerHTML =
-      "<p>press <b>o</b>/<b>l</b> to change resolution</p>";
+      "<span>press <b>o</b>/<b>l</b> to change <b>resolution</b></span>";
   dev3.children[2].innerHTML =
-      "<p>press <b>k</b>/<b>i</b> to change iterations</p>";
-  dev3.children[7].innerHTML = "<p>hold <b>ctrl</b> to drag</p>";
+      "<span>press <b>k</b>/<b>i</b> to change <b>iterations</b></span>";
+  dev3.children[10].innerHTML = "<span>hold <b>ctrl</b> to <b>drag</b></span>";
   dev3.children[3].innerHTML =
-      "<p>press <b>c</b>/<b>v</b> to change magnification</p>";
-  dev3.children[4].innerHTML = "<p>press <b>d</b> to save in .jpg</p>";
-  dev3.children[5].innerHTML =
-      "<p>press <b>g</b>, <b>h</b>, <b>j</b> to change saturation, delta hue, value</p>";
-  dev3.children[0].innerHTML = "<p>press <b>e</b> to close/open help div</p>";
+      "<span>press <b>c</b>/<b>v</b> to change <b>magnification</b></span>";
+  dev3.children[15].innerHTML = "<span>press <b>d</b> to save in <b>.jpg<b></span>";
+  dev3.children[11].innerHTML =
+      "<span>press <b>g</b>, <b>h</b>, <b>j</b> to change <b>s</b>aturation, delta <b>h</b>ue, <b>v</b>alue</span>";
+  dev3.children[0].innerHTML = "<span>press <b>e</b> to close/open <b>help</b> div</span>";
   dev3.children[8].innerHTML =
-      "<p>press <b>mid mouse button</b> to go one step back</p>";
-  dev3.children[10].innerHTML =
-      "<p>press <b>1</b> to enter black&white mode</p>";
-  dev3.children[11].innerHTML = "<p>press <b>2</b> to enter dark mode</p>";
+      "<span>press <b>mid mouse button</b> to go one step <b>back</b></span>";
   dev3.children[12].innerHTML =
-      "<p>press <b>q</b>/<b>a</b> to change the number of workers</p>";
-  dev3.children[13].innerHTML = "<p>press <b>x</b> to kill current job</p>";
-  dev3.children[14].innerHTML = '<p>press <b>u</b> to update image</p>';
-  
+      "<span>press <b>1</b> to enter <b>b</b>lack&<b>w</b>hite mode</span>";
+  dev3.children[13].innerHTML = "<span>press <b>2</b> to enter <b>dark</b> mode</span>";
+  dev3.children[5].innerHTML =
+      "<span>press <b>q</b>/<b>a</b> to change the number of <b>workers</b></span>";
+  dev3.children[7].innerHTML = "<span>press <b>x</b> to <b>kill</b> current job</span>";
+  dev3.children[14].innerHTML = '<span>press <b>u</b> to <b>update</b> image</span>';
+  dev3.children[4].innerHTML = '<span>press <b>p</b> to change <b>precision</b> mode</span>';
+
   this.document.body.appendChild(dev0);
   this.document.body.appendChild(dev1);
   this.document.body.appendChild(dev3);
@@ -436,20 +431,20 @@ function updateInformation(currentX, currentY) {
   if (dev0) {
     if (!currentX) currentX = 0;
     if (!currentY) currentY = 0;
-    dev0.children[10].innerHTML = "<p>x: " + currentX + "</p>";
-    dev0.children[11].innerHTML = "<p>y: " + currentY + "</p>";
+    dev0.children[11].innerHTML = "<span>x: " + currentX+"</span>";
+    dev0.children[12].innerHTML = "<span>y: " + currentY+"</span>";
     dev0.children[2].innerHTML =
-      "<p>Resolution: " +
+      "<span>Resolution: " +
       Math.round(width / degrad) +
       "x" +
-      Math.round(height / degrad) +
-      "</p>";
-    dev0.children[3].innerHTML = "<p>Iterations: " + iter + "</p>";
-    dev0.children[4].innerHTML = "<p>Magnifier: " + scl + "</p>";
-    dev0.children[5].innerHTML = "<p>Zoomed in: " + zoomed + "</p>";
-    dev0.children[6].innerHTML = "<p>Saturation: " + sat + "</p>";
-    dev0.children[7].innerHTML = "<p>Delta Hue: " + Hue + "</p>";
-    dev0.children[8].innerHTML = "<p>Value: " + Value + "</p>";
-    dev0.children[9].innerHTML = "<p>Workers: " + workers + "</p>";
+      Math.round(height / degrad)+"</span>";
+    dev0.children[3].innerHTML = "<span>Iterations: " + iter+"</span>";
+    dev0.children[4].innerHTML = "<span>Magnifier: " + scl+"</span>";
+    dev0.children[5].innerHTML = "<span>Zoomed in: " + zoomed+"</span>";
+    dev0.children[6].innerHTML = "<span>Saturation: " + sat+"</span>";
+    dev0.children[7].innerHTML = "<span>Delta Hue: " + Hue+"</span>";
+    dev0.children[8].innerHTML = "<span>Value: " + Value+"</span>";
+    dev0.children[9].innerHTML = "<span>Workers: " + workers+"</span>";
+    dev0.children[10].innerHTML = "<span>Precision: " + ((P) ? "arbitrary" : "normal") + "</span>";
   }
 }
