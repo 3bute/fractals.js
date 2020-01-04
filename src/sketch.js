@@ -38,7 +38,8 @@ var ax,
   h0 = 0, w0 = 0,
   proc = [],
   prec,
-  P = false;
+  P = false,
+  destination;
 
 function setup() {
   console.log(innerWidth, innerHeight);

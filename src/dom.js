@@ -167,8 +167,6 @@ document.addEventListener("keydown", event => {
   }
   if (event.keyCode == 85) {
     cvs = createCanvas(windowWidth, windowHeight);
-    dev1.style.left = windowWidth / 2 - 45 + "px";
-    dev1.style.top = windowHeight / 2 - 10 + "px"; 
     if (P) 
       setTimeout(()=>{
         var crd = coords[coords.length-1];
@@ -198,11 +196,6 @@ document.addEventListener("keydown", event => {
     return;
   }
   if (event.keyCode == 80 ) { 
-    dev0.style.position = "absolute";
-    dev0.style.padding = "0px";
-    dev0.style.margin = "0px";
-    dev0.style.left = "8px";
-    dev0.style.top = "8px";
     dev0.innerHTML = '';
     for (var i = 0; i < 20; i++) {
       let p = document.createElement("p");
@@ -217,7 +210,22 @@ document.addEventListener("keydown", event => {
   if (event.keyCode == 83){
     if (prec>1) prec--;
   }
+  if (event.keyCode == 16){
+    getCoordinates();
+  }
+  if (event.keyCode == 107 || event.keyCode == 187){
+    zoom(4.0);
+  }
+  if (event.keyCode == 109 || event.keyCode == 189){
+    zoom(0.5);
+  }
 });
+
+function getCoordinates(){
+  let x = prompt('type x:')||0;
+  let y = prompt('type y:')||0;
+  xypoints(x, y);
+}
 
 function checkColor() {
   if (!prevColors) prevColors = {};
@@ -260,54 +268,8 @@ function createControls() {
     oldMouseY = null;
   });
 
-  cvs.elt.addEventListener("mousemove", event => {
-    if (busy) return;
-    var x = mouseX;
-    var y = mouseY;
-    xM = x;
-    yM = y;
-    ax = x - width / scl / 2;
-    ay = y - height / scl / 2;
-    drawMagnifier();
-    
-    var currentX = map(
-      x,
-      0,
-      width,
-      coords[coords.length - 1].x0,
-      coords[coords.length - 1].x1
-    );
-    var currentY = map(
-      y,
-      0,
-      height,
-      coords[coords.length - 1].y0,
-      coords[coords.length - 1].y1
-    );
-    updateInformation(currentX, currentY);
-
-    if (mouseIsPressed && dragged) {
-      var crd = coords[coords.length - 1];
-      if (oldMouseX && oldMouseY) {
-        var xRem = map(oldMouseX - mouseX, 0, width, 0, crd.x1 - crd.x0);
-        var yRem = map(oldMouseY - mouseY, 0, height, 0, crd.y1 - crd.y0);
-        var xstt = crd.x0 + xRem;
-        var ystt = crd.y0 + yRem;
-        var xend = crd.x1 + xRem;
-        var yend = crd.y1 + yRem;
-        oldMouseX = mouseX;
-        oldMouseY = mouseY;
-        coords.push({ x0: xstt, y0: ystt, x1: xend, y1: yend });
-        dropSet();
-        var toDel = coords[coords.length - 2];
-        coords[coords.length - 2] = coords[coords.length - 1];
-        coords.pop();
-      } else {
-        oldMouseX = mouseX;
-        oldMouseY = mouseY;
-      }
-    }
-  });
+  cvs.elt.removeEventListener('mousemove', mousemoveP);
+  cvs.elt.addEventListener("mousemove", mousemove);
 
   dev0 = document.createElement("div");
   dev0.style.position = "absolute";
@@ -372,19 +334,64 @@ function createControls() {
   dev3.children[7].innerHTML = "<span>press <b>x</b> to <b>kill</b> current job</span>";
   dev3.children[14].innerHTML = '<span>press <b>u</b> to <b>update</b> image</span>';
   dev3.children[4].innerHTML = '<span>press <b>p</b> to change <b>precision</b> mode</span>';
-
+  dev3.children[16].innerHTML = '<span>press <b>+</b>/<b>-</b> to zoom in the center of the screen</span>';
+  dev3.children[17].innerHTML = '<span>press <b>schift</b> to open coordinates prompt</span>';
   this.document.body.appendChild(dev0);
   this.document.body.appendChild(dev1);
   this.document.body.appendChild(dev3);
   this.document.body.appendChild(dev4);
 }
 
-function createControlsP() {
-  cvs.elt.setAttribute(
-    "onmouseup",
-    "if (!busy && !dragged && !midbutton) makeSetP();"
+function mousemove(event) {
+  if (busy) return;
+  var x = mouseX;
+  var y = mouseY;
+  xM = x;
+  yM = y;
+  ax = x - width / scl / 2;
+  ay = y - height / scl / 2;
+  drawMagnifier();
+  
+  var currentX = map(
+    x,
+    0,
+    width,
+    coords[coords.length - 1].x0,
+    coords[coords.length - 1].x1
   );
-  cvs.elt.addEventListener("mousemove", event => {
+  var currentY = map(
+    y,
+    0,
+    height,
+    coords[coords.length - 1].y0,
+    coords[coords.length - 1].y1
+  );
+  updateInformation(currentX, currentY);
+
+  if (mouseIsPressed && dragged) {
+    var crd = coords[coords.length - 1];
+    if (oldMouseX && oldMouseY) {
+      var xRem = map(oldMouseX - mouseX, 0, width, 0, crd.x1 - crd.x0);
+      var yRem = map(oldMouseY - mouseY, 0, height, 0, crd.y1 - crd.y0);
+      var xstt = crd.x0 + xRem;
+      var ystt = crd.y0 + yRem;
+      var xend = crd.x1 + xRem;
+      var yend = crd.y1 + yRem;
+      oldMouseX = mouseX;
+      oldMouseY = mouseY;
+      coords.push({ x0: xstt, y0: ystt, x1: xend, y1: yend });
+      dropSet();
+      var toDel = coords[coords.length - 2];
+      coords[coords.length - 2] = coords[coords.length - 1];
+      coords.pop();
+    } else {
+      oldMouseX = mouseX;
+      oldMouseY = mouseY;
+    }
+  }
+}
+
+function mousemoveP(event){
     if (busy) return;
     var x = mouseX;
     var y = mouseY;
@@ -421,7 +428,7 @@ function createControlsP() {
         var yend = crd.y1.plus(yRem);
         oldMouseX = mouseX;
         oldMouseY = mouseY;
-        coords.push({ x0: xstt, y0: ystt, x1: xend, y1: yend });
+        coords.push({x0: xstt, y0: ystt, x1: xend, y1: yend});
         dropSetP();
         coords[coords.length - 2] = coords[coords.length - 1];
         coords.pop();
@@ -430,7 +437,15 @@ function createControlsP() {
         oldMouseY = mouseY;
       }
     }
-  });
+}
+
+function createControlsP() {
+  cvs.elt.setAttribute(
+    "onmouseup",
+    "if (!busy && !dragged && !midbutton) makeSetP();"
+  );
+  cvs.elt.removeEventListener('mousemove', mousemove);
+  cvs.elt.addEventListener("mousemove", mousemoveP);
 }
 
 function updateInformation(currentX, currentY) {

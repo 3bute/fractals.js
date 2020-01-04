@@ -1,6 +1,69 @@
+function xypoints(x, y) {
+  if (!P){
+    x = parseFloat(x);
+    y = parseFloat(y);
+    let crd = coords[coords.length-1];
+    let dtcx = x - (crd.x1 + crd.x0)/2,
+        dtcy = y - (crd.y0 + crd.y1)/2;
+    crd.x0 += dtcx;
+    crd.x1 += dtcx;
+    crd.y0 += dtcy;
+    crd.y1 += dtcy;
+    dropSet();
+  }else{
+    x = BigNumber(x);
+    y = BigNumber(y);
+    let crd = coords[coords.length-1];
+    let dtcx = x.minus(crd.x1.plus(crd.x0).div(2)),
+        dtcy = y.minus(crd.y0.plus(crd.y1).div(2));
+    crd.x0 = crd.x0.plus(dtcx).toFixed(prec);
+    crd.x1 = crd.x1.plus(dtcx).toFixed(prec);
+    crd.y0 = crd.y0.plus(dtcy).toFixed(prec);
+    crd.y1 = crd.y1.plus(dtcy).toFixed(prec);
+    dropSetP();
+  }
+  destination = {};
+  destination.x = x;
+  destination.y = y;
+}
+
+function zoom(i) {
+  let crd = coords[coords.length -1],
+      ctr;
+  if (destination) ctr = destination;
+  if (!P) {
+    if (!ctr) {
+      ctr = {};
+      ctr.x = (crd.x0 + crd.x1)/2;
+      ctr.y = (crd.y0 + crd.y1)/2;
+    }
+    ctr.xd = (crd.x1 - crd.x0)/i;
+    ctr.yd = (crd.y0 - crd.y1)/i;
+    crd.x0 = ctr.x - ctr.xd;
+    crd.x1 = ctr.x + ctr.xd;
+    crd.y0 = ctr.y + ctr.yd;
+    crd.y1 = ctr.y - ctr.yd;
+    dropSet();
+  }else{
+    if (!ctr) {
+      ctr = {};
+      ctr.x = crd.x0.plus(crd.x1).div(2.0);
+      ctr.y = crd.y0.plus(crd.y1).div(2.0);
+    }
+    ctr.xd = crd.x1.minus(crd.x0).div(i);
+    ctr.yd = crd.y0.minus(crd.y1).div(i);
+    crd.x0 = ctr.x.minus(ctr.xd);
+    crd.x1 = ctr.x.plus(ctr.xd);
+    crd.y0 = ctr.y.plus(ctr.yd);
+    crd.y1 = ctr.y.minus(ctr.yd);
+    dropSetP();
+  }
+}
 
 function switchP() {
   P = !P;
+  degrad = 40;
+  workers = 64;
   if (!prec) prec = 17;
   if (P) setupP(); 
   else{
