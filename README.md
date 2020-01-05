@@ -1,3 +1,4 @@
+![Alt text](scn.png?raw=true "Optional Title")
 # js mandelbrot / julia set viewer
 
 https://fract.glitch.me
