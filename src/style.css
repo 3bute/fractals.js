@@ -7,16 +7,16 @@ canvas {
 }
 p {
   width: 33ch;
-  margin: 10px;
+  margin: 5px;
   font: #000;
 }
 span {
-  padding: 2px;
+  padding: 0 3px;
   background: #fff;
 }
 body {
   font-family: monospace;
-  font: 15px;
+  font: 10px;
 }
 body{
     -webkit-touch-callout: none;
