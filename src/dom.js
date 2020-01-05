@@ -124,19 +124,18 @@ document.addEventListener("keydown", event => {
     return;
   }
   if (event.keyCode == 49) {
+    bw = !bw;
     if (prevColors) {
       Hue = prevColors.Hue;
       sat = prevColors.sat;
       Value = prevColors.Value;
       prevColors = null;
-      bw = false;
-    if (P) dropSetP();
-    else dropSet();
+      if (P) dropSetP();
+      else dropSet();
     } else {
       prevColors = {};
       (prevColors.Hue = Hue), (prevColors.sat = sat);
       prevColors.Value = Value;
-      bw = true;
       if (P) dropSetP();
       else dropSet();
     }
@@ -144,6 +143,11 @@ document.addEventListener("keydown", event => {
   }
   if (event.keyCode == 50) {
     dark = !dark;
+    let els = document.body.querySelectorAll('span');
+    for (let i = 0; i<els.length;i++) {
+      els[i].style.background = (dark) ? '#000' : '#fff';
+      els[i].style.color = (dark) ? '#fff' : '#000';
+    }
     if (P) dropSetP();
     else dropSet();
     return;
@@ -296,7 +300,7 @@ function createControls() {
   dev3.style.display = "block";
 
   for (var i = 0; i < 20; i++) {
-    var p = document.createElement("p");
+    let p = document.createElement("p");
     dev3.appendChild(p);
   }
 
@@ -473,5 +477,10 @@ function updateInformation(currentX, currentY) {
     dev0.children[9].innerHTML = "<span>Workers: " + workers+"</span>";
     dev0.children[10].innerHTML = "<span>Precision: " + ((P) ? "arbitrary" : "normal") + "</span>";
     dev0.children[13].innerHTML = "<span>View: " +( (julia) ? 'Julia' : 'Mandelbrot')+"</span>";
+    let els = document.body.querySelectorAll('span');
+    for (let i = 0; i<els.length;i++) {
+      els[i].style.background = (dark) ? '#000' : '#fff';
+      els[i].style.color = (dark) ? '#fff' : '#000';
+    }
   }
 }

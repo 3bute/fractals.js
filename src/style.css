@@ -11,7 +11,8 @@ p {
   font: #000;
 }
 span {
-  padding: 0 3px;
+  padding: 0px 3px;
+  margin: 2px 0;
   background: #fff;
 }
 body {
@@ -27,3 +28,4 @@ body{
     user-select: none;
   cursor: cell;
 }
+
