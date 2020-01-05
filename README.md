@@ -1,6 +1,6 @@
-# js mandelbrot viewer
+# js mandelbrot / julia set viewer
 
-https://mbset.glitch.me
+https://fract.glitch.me
 
 Enjoy patterns of nature! The viewer provides minimalistic design, intuitive functionality and easy to use interface.
 
