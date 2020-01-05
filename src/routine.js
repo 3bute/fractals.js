@@ -44,7 +44,7 @@ var ax,
   julia = false,
   jPo,
   currentX,
-  currentY;
+  currentY; 
 
 function setup() {
   console.log(innerWidth, innerHeight);
@@ -92,21 +92,26 @@ function xypoints(x, y) {
     crd.y1 = crd.y1.plus(dtcy).toFixed(prec);
     dropSetP();
   }
-  destination = {};
-  destination.x = x;
-  destination.y = y;
+}
+
+function getCenter(crd) {
+  let ctr;
+  if (!P) {
+    ctr = {};
+    ctr.x = (crd.x0 + crd.x1)/2;
+    ctr.y = (crd.y0 + crd.y1)/2;
+  }else{
+    ctr = {};
+    ctr.x = crd.x0.plus(crd.x1).div(2.0);
+    ctr.y = crd.y0.plus(crd.y1).div(2.0);
+  }
+  return ctr;
 }
 
 function zoom(i) {
-  let crd = coords[coords.length -1],
-      ctr;
-  if (destination) ctr = destination;
+  let crd = coords[coords.length -1];
   if (!P) {
-    if (!ctr) {
-      ctr = {};
-      ctr.x = (crd.x0 + crd.x1)/2;
-      ctr.y = (crd.y0 + crd.y1)/2;
-    }
+    let ctr = getCenter(crd);
     ctr.xd = (crd.x1 - crd.x0)/i;
     ctr.yd = (crd.y0 - crd.y1)/i;
     crd.x0 = ctr.x - ctr.xd;
@@ -115,11 +120,7 @@ function zoom(i) {
     crd.y1 = ctr.y - ctr.yd;
     dropSet();
   }else{
-    if (!ctr) {
-      ctr = {};
-      ctr.x = crd.x0.plus(crd.x1).div(2.0);
-      ctr.y = crd.y0.plus(crd.y1).div(2.0);
-    }
+    let ctr = getCenter(crd);
     ctr.xd = crd.x1.minus(crd.x0).div(i);
     ctr.yd = crd.y0.minus(crd.y1).div(i);
     crd.x0 = ctr.x.minus(ctr.xd);
@@ -201,7 +202,7 @@ function getPoints(it, xstt, ystt, xend, yend) {
     if (!dark) background(0);
     else background(255);
   } else {
-    background(125);
+    background(255 - 125*255/Value);
   }
   busy = true;
   show();

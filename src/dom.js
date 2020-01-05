@@ -97,6 +97,18 @@ document.addEventListener("keydown", event => {
     return;
   }
   if (event.keyCode == 68) {
+    if (confirm('Write coordinates on the canvas?')) {
+      let ctr = getCenter(coords[coords.length-1]);
+      let txt = 'x: ' + ctr.x + '\ny: ' + ctr.y;
+      if (dark) fill(0);
+      else fill(255);
+      rect(9, height - 40, ctr.x.toString().length*8.5, 15);
+      rect(9, height - 25, ctr.y.toString().length*8.5, 15);
+      if (dark) fill(255);
+      else fill(0);
+      textFont('monospace');
+      text(txt, 11, height - 30);
+    }
     saveCanvas(cvs, "mandelbrot", "jpg");
     return;
   }
