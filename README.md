@@ -1,4 +1,4 @@
-![Screenshot](scn.png?raw=true)
+![Screenshot](scn0.png?raw=true)
 # js mandelbrot / julia set viewer
 
 https://fract.glitch.me
