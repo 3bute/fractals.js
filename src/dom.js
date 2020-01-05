@@ -219,6 +219,10 @@ document.addEventListener("keydown", event => {
   if (event.keyCode == 109 || event.keyCode == 189){
     zoom(0.5);
   }
+  if (event.keyCode == 82){
+   julia = !julia;
+   jPo = null;
+  }
 });
 
 function getCoordinates(){
@@ -336,6 +340,7 @@ function createControls() {
   dev3.children[4].innerHTML = '<span>press <b>p</b> to change <b>precision</b> mode</span>';
   dev3.children[16].innerHTML = '<span>press <b>+</b>/<b>-</b> to zoom in the center of the screen</span>';
   dev3.children[17].innerHTML = '<span>press <b>schift</b> to open coordinates prompt</span>';
+  dev3.children[18].innerHTML = '<span>press <b>r</b> and choose a point on the complex plain to make a julia set from it</span>';
   this.document.body.appendChild(dev0);
   this.document.body.appendChild(dev1);
   this.document.body.appendChild(dev3);
@@ -352,14 +357,14 @@ function mousemove(event) {
   ay = y - height / scl / 2;
   drawMagnifier();
   
-  var currentX = map(
+  currentX = map(
     x,
     0,
     width,
     coords[coords.length - 1].x0,
     coords[coords.length - 1].x1
   );
-  var currentY = map(
+  currentY = map(
     y,
     0,
     height,
@@ -401,14 +406,14 @@ function mousemoveP(event){
     ay = y - height / scl / 2;
     drawMagnifier();
     
-    var currentX = mapFloat(
+    currentX = mapFloat(
       x,
       0,
       width,
       coords[coords.length - 1].x0,
       coords[coords.length - 1].x1
     );
-    var currentY = mapFloat(
+    currentY = mapFloat(
       y,
       0,
       height,
@@ -467,5 +472,6 @@ function updateInformation(currentX, currentY) {
     dev0.children[8].innerHTML = "<span>Value: " + Value+"</span>";
     dev0.children[9].innerHTML = "<span>Workers: " + workers+"</span>";
     dev0.children[10].innerHTML = "<span>Precision: " + ((P) ? "arbitrary" : "normal") + "</span>";
+    dev0.children[13].innerHTML = "<span>View: " +( (julia) ? 'Julia' : 'Mandelbrot')+"</span>";
   }
 }
