@@ -1,6 +1,6 @@
 
-/* @author 
- * 
+/* @author
+ *
  * @3bute <fiedelferro@gmail.com>
  *
  */
@@ -44,7 +44,7 @@ var ax,
   julia = false,
   jPo,
   currentX,
-  currentY; 
+  currentY;
 
 function setup() {
   console.log(innerWidth, innerHeight);
@@ -141,7 +141,7 @@ function switchP() {
     degrad = 10;
     workers = 8;
     let crd = coords[coords.length-1];
-    coords.push({ 
+    coords.push({
       x0: Number(crd.x0.toFixed(16)),
       x1: Number(crd.x1.toFixed(16)),
       y0: Number(crd.y0.toFixed(16)),
@@ -178,7 +178,7 @@ function makeSet() {
   xend = map(ax + w, 0, width, crd.x0, crd.x1);
   yend = map(ay + h, 0, height, crd.y0, crd.y1);
   if (Math.abs((xend - xstt)/(ystt - yend) - width/height) > 0.01) {
-    switchP();    
+    switchP();
     alert('switched to high precision, the speed will drop significantly :\(');
     return ;
   }
@@ -293,7 +293,7 @@ function stuff(x0, y0, x1, y1, it, xstt, ystt, xend, yend) {
 }
 
 function drawRect(delta, val, bound, x, y){
-  let check = (P) ? (val.isGreaterThan(bound)) : (val > bound); 
+  let check = (P) ? (val.isGreaterThan(bound)) : (val > bound);
   if (check) {
     if (bw) {
       colorMode(RGB, 255);
@@ -315,7 +315,7 @@ function drawRect(delta, val, bound, x, y){
 
 
 function setupP() {
-  BigNumber.set({ DECIMAL_PLACES: prec });	
+  BigNumber.set({ DECIMAL_PLACES: prec });
   let crd = coords[coords.length-1];
   coords.push({ x0: new BigNumber(crd.x0),
 	              x1: new BigNumber(crd.x1),

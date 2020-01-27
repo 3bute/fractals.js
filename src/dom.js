@@ -183,7 +183,7 @@ document.addEventListener("keydown", event => {
   }
   if (event.keyCode == 85) {
     cvs = createCanvas(windowWidth, windowHeight);
-    if (P) 
+    if (P)
       setTimeout(()=>{
         var crd = coords[coords.length-1];
         var delH = (height - h0)/2;
@@ -211,13 +211,13 @@ document.addEventListener("keydown", event => {
       }, 300);
     return;
   }
-  if (event.keyCode == 80 ) { 
+  if (event.keyCode == 80 ) {
     dev0.innerHTML = '';
     for (var i = 0; i < 20; i++) {
       let p = document.createElement("p");
       dev0.appendChild(p);
     }
-    switchP();    
+    switchP();
     return ;
   }
   if (event.keyCode == 87){
@@ -242,8 +242,12 @@ document.addEventListener("keydown", event => {
 });
 
 function getCoordinates(){
-  let x = prompt('type x:')||0;
-  let y = prompt('type y:')||0;
+  var x = prompt("type x:");
+  var y = prompt("type y:");
+  while (!x && !y) {
+    if (!x) prompt("type x:");
+    if (!y) prompt("type y:");
+  }
   xypoints(x, y);
 }
 
@@ -260,7 +264,7 @@ function drawMagnifier(){
       dev4.style.width = width/scl  + 'px';
       dev4.style.height = height/scl + 'px';
       dev4.style.left = ( mouseX - 0.5 * width / scl) + "px";
-      dev4.style.top = ( mouseY - 0.5 * height / scl)+ "px"; 
+      dev4.style.top = ( mouseY - 0.5 * height / scl)+ "px";
       setTimeout(()=>{
         magnif = false;
         dev4.style.display = 'none';
@@ -357,6 +361,7 @@ function createControls() {
   dev3.children[16].innerHTML = '<span>press <b>+</b>/<b>-</b> to zoom in the center of the screen</span>';
   dev3.children[17].innerHTML = '<span>press <b>schift</b> to open coordinates prompt</span>';
   dev3.children[18].innerHTML = '<span>press <b>r</b> and choose a point on the complex plain to make a julia set from it</span>';
+
   this.document.body.appendChild(dev0);
   this.document.body.appendChild(dev1);
   this.document.body.appendChild(dev3);
@@ -372,7 +377,7 @@ function mousemove(event) {
   ax = x - width / scl / 2;
   ay = y - height / scl / 2;
   drawMagnifier();
-  
+
   currentX = map(
     x,
     0,
@@ -421,7 +426,7 @@ function mousemoveP(event){
     ax = x - width / scl / 2;
     ay = y - height / scl / 2;
     drawMagnifier();
-    
+
     currentX = mapFloat(
       x,
       0,
