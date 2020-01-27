@@ -242,12 +242,10 @@ document.addEventListener("keydown", event => {
 });
 
 function getCoordinates(){
-  var x = prompt("type x:");
-  var y = prompt("type y:");
-  while (!x && !y) {
-    if (!x) prompt("type x:");
-    if (!y) prompt("type y:");
-  }
+  var x = 0;
+  while (!x) x = prompt("type x:");
+  var y= 0;
+  while (!y) y = prompt("type y:");
   xypoints(x, y);
 }
 
