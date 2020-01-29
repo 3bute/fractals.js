@@ -1,4 +1,3 @@
-
 function show(){dev1.style.display = "block";}
 function unshow(){dev1.style.display = "none";}
 document.addEventListener("keyup", e => {
@@ -98,16 +97,7 @@ document.addEventListener("keydown", event => {
   }
   if (event.keyCode == 68) {
     if (confirm('Write coordinates on the canvas?')) {
-      let ctr = getCenter(coords[coords.length-1]);
-      let txt = 'x: ' + ctr.x + '\ny: ' + ctr.y;
-      if (dark) fill(0);
-      else fill(255);
-      rect(9, height - 40, ctr.x.toString().length*8.5, 15);
-      rect(9, height - 25, ctr.y.toString().length*8.5, 15);
-      if (dark) fill(255);
-      else fill(0);
-      textFont('monospace');
-      text(txt, 11, height - 30);
+      drawCoordinates(getCenter());
     }
     saveCanvas(cvs, "mandelbrot", "jpg");
     return;
@@ -227,26 +217,45 @@ document.addEventListener("keydown", event => {
     if (prec>1) prec--;
   }
   if (event.keyCode == 16){
+    destination = true;
     getCoordinates();
   }
   if (event.keyCode == 107 || event.keyCode == 187){
-    zoom(4.0);
+    destination = true;
+    zoom(4.0 * scl);
   }
   if (event.keyCode == 109 || event.keyCode == 189){
-    zoom(0.5);
+    destination = true;
+    zoom(0.5 / scl);
   }
   if (event.keyCode == 82){
-   julia = !julia;
-   jPo = null;
+    julia = !julia;
+    jPo = null;
   }
 });
 
 function getCoordinates(){
-  var x = 0;
-  while (!x) x = prompt("type x:");
-  var y= 0;
-  while (!y) y = prompt("type y:");
-  xypoints(x, y);
+  var x = "";
+  while (!x) {
+    x = prompt("type x:");
+  }
+  var y = "";
+  while (!y) {
+    y = prompt("type y:");
+  }
+  if (x.length>16 || y.length>16) {
+    setPrecision(x.length);
+    switchP(false);
+    xyPointsP(x, y);
+  }else{
+    xypoints(x, y);
+  }
+}
+
+function xyPointsP(x, y) {
+  let x0 = new BigNumber(x.toString())
+    , y0 = new BigNumber(y.toString())
+  xypoints(x0, y0);
 }
 
 function checkColor() {
@@ -258,17 +267,22 @@ function checkColor() {
 
 function drawMagnifier(){
   if (magnif) {
-      dev4.style.display = 'block';
-      dev4.style.width = width/scl  + 'px';
-      dev4.style.height = height/scl + 'px';
+    dev4.style.display = 'block';
+    dev4.style.width = width/scl  + 'px';
+    dev4.style.height = height/scl + 'px';
+    if (!destination) {
       dev4.style.left = ( mouseX - 0.5 * width / scl) + "px";
-      dev4.style.top = ( mouseY - 0.5 * height / scl)+ "px";
-      setTimeout(()=>{
-        magnif = false;
-        dev4.style.display = 'none';
-      }, 200);
+      dev4.style.top = ( mouseY - 0.5 * width / scl) + "px";
+    }else{
+      dev4.style.left = ( 0.5 * (width - width / scl)) + "px";
+      dev4.style.top = ( 0.5 * (height - height / scl)) + "px";
+    }setTimeout(()=>{
+      magnif = false;
+      dev4.style.display = 'none';
+    }, 200);
   }
 }
+
 function createControls() {
   cvs.elt.setAttribute(
     "onmouseup",
@@ -279,7 +293,7 @@ function createControls() {
     if (event.button == 1) {
       midbutton = true;
       if (coords.length > 1) coords.pop();
-      if (zoomed>1) zoomed -= scl;
+      if (ed>1) zoomed -= scl;
       if (P) dropSetP();
       else dropSet();
       setTimeout(() => (midbutton = false), 500);
@@ -318,6 +332,7 @@ function createControls() {
     dev3.appendChild(p);
   }
 
+
   dev1 = document.createElement("div");
   dev1.style.background = "#fff";
   dev1.style.position = "absolute";
@@ -334,6 +349,18 @@ function createControls() {
   dev4.style.margin = "0px";
   dev4.style.display = "none";
   dev4.style.border = '1px solid #888';
+
+
+  dev5  = document.createElement("div");
+  dev5.style.position = "absolute";
+  dev5.style.padding = "0px";
+  dev5.style.margin = "0px";
+  dev5.style.bottom = "8px";
+  dev5.style.left = "8px";
+  for (var i = 0; i < 2; i++) {
+    let p = document.createElement("p");
+    dev5.appendChild(p);
+  }
 
   dev3.children[1].innerHTML =
       "<span>press <b>o</b>/<b>l</b> to change <b>resolution</b></span>";
@@ -356,7 +383,7 @@ function createControls() {
   dev3.children[7].innerHTML = "<span>press <b>x</b> to <b>kill</b> current job</span>";
   dev3.children[14].innerHTML = '<span>press <b>u</b> to <b>update</b> image</span>';
   dev3.children[4].innerHTML = '<span>press <b>p</b> to change <b>precision</b> mode</span>';
-  dev3.children[16].innerHTML = '<span>press <b>+</b>/<b>-</b> to zoom in the center of the screen</span>';
+  dev3.children[16].innerHTML = '<span>press <b>+</b>/<b>-</b> to  in the center of the screen</span>';
   dev3.children[17].innerHTML = '<span>press <b>schift</b> to open coordinates prompt</span>';
   dev3.children[18].innerHTML = '<span>press <b>r</b> and choose a point on the complex plain to make a julia set from it</span>';
 
@@ -364,6 +391,7 @@ function createControls() {
   this.document.body.appendChild(dev1);
   this.document.body.appendChild(dev3);
   this.document.body.appendChild(dev4);
+  this.document.body.appendChild(dev5);
 }
 
 function mousemove(event) {
@@ -374,7 +402,6 @@ function mousemove(event) {
   yM = y;
   ax = x - width / scl / 2;
   ay = y - height / scl / 2;
-  drawMagnifier();
 
   currentX = map(
     x,
@@ -416,51 +443,49 @@ function mousemove(event) {
 }
 
 function mousemoveP(event){
-    if (busy) return;
-    var x = mouseX;
-    var y = mouseY;
-    xM = x;
-    yM = y;
-    ax = x - width / scl / 2;
-    ay = y - height / scl / 2;
-    drawMagnifier();
+  if (busy) return;
+  var x = mouseX;
+  var y = mouseY;
+  xM = x;
+  yM = y;
+  ax = x - width / scl / 2;
+  ay = y - height / scl / 2;
+  currentX = mapFloat(
+    x,
+    0,
+    width,
+    coords[coords.length - 1].x0,
+    coords[coords.length - 1].x1
+  );
+  currentY = mapFloat(
+    y,
+    0,
+    height,
+    coords[coords.length - 1].y0,
+    coords[coords.length - 1].y1
+  );
+  updateInformation(currentX.toString(), currentY.toString());
 
-    currentX = mapFloat(
-      x,
-      0,
-      width,
-      coords[coords.length - 1].x0,
-      coords[coords.length - 1].x1
-    );
-    currentY = mapFloat(
-      y,
-      0,
-      height,
-      coords[coords.length - 1].y0,
-      coords[coords.length - 1].y1
-    );
-    updateInformation(currentX.toString(), currentY.toString());
-
-    if (mouseIsPressed && dragged) {
-      var crd = coords[coords.length - 1];
-      if (oldMouseX && oldMouseY) {
-        var xRem = mapFloat(oldMouseX - mouseX, 0, width, 0, crd.x1.minus(crd.x0));
-        var yRem = mapFloat(oldMouseY - mouseY, 0, height, 0, crd.y1.minus(crd.y0));
-        var xstt = crd.x0.plus(xRem);
-        var ystt = crd.y0.plus(yRem);
-        var xend = crd.x1.plus(xRem);
-        var yend = crd.y1.plus(yRem);
-        oldMouseX = mouseX;
-        oldMouseY = mouseY;
-        coords.push({x0: xstt, y0: ystt, x1: xend, y1: yend});
-        dropSetP();
-        coords[coords.length - 2] = coords[coords.length - 1];
-        coords.pop();
-      } else {
-        oldMouseX = mouseX;
-        oldMouseY = mouseY;
-      }
+  if (mouseIsPressed && dragged) {
+    var crd = coords[coords.length - 1];
+    if (oldMouseX && oldMouseY) {
+      var xRem = mapFloat(oldMouseX - mouseX, 0, width, 0, crd.x1.minus(crd.x0));
+      var yRem = mapFloat(oldMouseY - mouseY, 0, height, 0, crd.y1.minus(crd.y0));
+      var xstt = crd.x0.plus(xRem);
+      var ystt = crd.y0.plus(yRem);
+      var xend = crd.x1.plus(xRem);
+      var yend = crd.y1.plus(yRem);
+      oldMouseX = mouseX;
+      oldMouseY = mouseY;
+      coords.push({x0: xstt, y0: ystt, x1: xend, y1: yend});
+      dropSetP();
+      coords[coords.length - 2] = coords[coords.length - 1];
+      coords.pop();
+    } else {
+      oldMouseX = mouseX;
+      oldMouseY = mouseY;
     }
+  }
 }
 
 function createControlsP() {
@@ -476,26 +501,31 @@ function updateInformation(currentX, currentY) {
   if (dev0) {
     if (!currentX) currentX = 0;
     if (!currentY) currentY = 0;
-    dev0.children[11].innerHTML = "<span>x: " + currentX+"</span>";
-    dev0.children[12].innerHTML = "<span>y: " + currentY+"</span>";
+    dev0.children[11].innerHTML = "<span class='maxwidth'>x:" + currentX + "</span>";
+    dev0.children[12].innerHTML = "<span class='maxwidth'>y:" + currentY + "</span>";
     dev0.children[2].innerHTML =
       "<span>Resolution: " +
       Math.round(width / degrad) +
       "x" +
       Math.round(height / degrad)+"</span>";
-    dev0.children[3].innerHTML = "<span>Iterations: " + iter+"</span>";
-    dev0.children[4].innerHTML = "<span>Magnifier: " + scl+"</span>";
-    dev0.children[5].innerHTML = "<span>Zoomed in: " + zoomed+"</span>";
-    dev0.children[6].innerHTML = "<span>Saturation: " + sat+"</span>";
-    dev0.children[7].innerHTML = "<span>Delta Hue: " + Hue+"</span>";
-    dev0.children[8].innerHTML = "<span>Value: " + Value+"</span>";
-    dev0.children[9].innerHTML = "<span>Workers: " + workers+"</span>";
+    dev0.children[3].innerHTML = "<span>Iterations: " + iter + "</span>";
+    dev0.children[4].innerHTML = "<span>Magnifier: " + scl + "</span>";
+    dev0.children[5].innerHTML = "<span>ed in: " + zoomed + "</span>";
+    dev0.children[6].innerHTML = "<span>Saturation: " + sat + "</span>";
+    dev0.children[7].innerHTML = "<span>Delta Hue: " + Hue + "</span>";
+    dev0.children[8].innerHTML = "<span>Value: " + Value + "</span>";
+    dev0.children[9].innerHTML = "<span>Workers: " + workers + "</span>";
     dev0.children[10].innerHTML = "<span>Precision: " + ((P) ? "arbitrary" : "normal") + "</span>";
-    dev0.children[13].innerHTML = "<span>View: " +( (julia) ? 'Julia' : 'Mandelbrot')+"</span>";
+    dev0.children[13].innerHTML = "<span>View: " +( (julia) ? 'Julia' : 'Mandelbrot') + "</span>";
     let els = document.body.querySelectorAll('span');
     for (let i = 0; i<els.length;i++) {
       els[i].style.background = (dark) ? '#000' : '#fff';
       els[i].style.color = (dark) ? '#fff' : '#000';
     }
   }
+}
+
+function drawCoordinates() {
+  dev5.children[0].innerHTML = "<span>x:" + currentX + "</span>";
+  dev5.children[1].innerHTML = "<span>y:" + currentY + "</span>";
 }

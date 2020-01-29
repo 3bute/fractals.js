@@ -19,6 +19,10 @@ body {
   font-family: monospace;
   font: 10px;
 }
+.maxwidth {
+  max-width: 33ch;
+  word-wrap: break-word;
+}
 body{
     -webkit-touch-callout: none;
     -webkit-user-select: none;

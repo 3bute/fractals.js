@@ -5,49 +5,51 @@
  *
  */
 
-var ax,
-  ay,
-  w,
-  h,
-  scl,
-  cvs,
-  degrad,
-  dev0,
-  dev1,
-  dev3,
-  dev4,
-  coords = [],
-  hold = false,
-  iter,
-  iPressed,
-  closed = false,
-  sat = 126,
-  Hue = 170,
-  Value = 255,
-  zoomed = 0,
-  oldMouseX,
-  oldMouseY,
-  dragged,
-  midbutton = false,
-  prevColors = null,
-  bw = false,
-  dark = false,
-  workers = 8,
-  busy = false,
-  stop = false,
-  magnif = false,
-  h0 = 0, w0 = 0,
-  proc = [],
-  prec,
-  P = false,
-  destination,
-  julia = false,
-  jPo,
-  currentX,
-  currentY;
+var ax
+  , ay
+  , w
+  , h
+  , scl
+  , cvs
+  , degrad
+  , dev0
+  , dev1
+  , dev3
+  , dev4
+  , dev5
+  , iter
+  , iPressed
+  , oldMouseX
+  , oldMouseY
+  , dragged
+  , prec
+  , jPo
+  , currentX
+  , currentY
+  , coords      = []
+  , hold        = false
+  , closed      = false
+  , sat         = 126
+  , Hue         = 170
+  , Value       = 255
+  , zoomed      = 0
+  , midbutton   = false
+  , prevColors  = null
+  , bw          = false
+  , dark        = false
+  , workers     = 8
+  , busy        = false
+  , stop        = false
+  , magnif      = false
+  , h0          = 0
+  , w0          = 0
+  , proc        = []
+  , P           = false
+  , julia       = false
+  , destination = false;
 
 function setup() {
-  console.log(innerWidth, innerHeight);
+  console.log('Width: ' + innerWidth + '\nHeight: ' +  innerHeight);
   cvs = createCanvas(windowWidth, windowHeight);
   h0 = height;
   w0 = width;
@@ -69,10 +71,10 @@ function setup() {
 
 
 function xypoints(x, y) {
+  let crd = coords[coords.length-1];
   if (!P){
     x = parseFloat(x);
     y = parseFloat(y);
-    let crd = coords[coords.length-1];
     let dtcx = x - (crd.x1 + crd.x0)/2,
         dtcy = y - (crd.y0 + crd.y1)/2;
     crd.x0 += dtcx;
@@ -81,62 +83,78 @@ function xypoints(x, y) {
     crd.y1 += dtcy;
     dropSet();
   }else{
-    x = BigNumber(x);
-    y = BigNumber(y);
-    let crd = coords[coords.length-1];
     let dtcx = x.minus(crd.x1.plus(crd.x0).div(2)),
         dtcy = y.minus(crd.y0.plus(crd.y1).div(2));
-    crd.x0 = crd.x0.plus(dtcx).toFixed(prec);
-    crd.x1 = crd.x1.plus(dtcx).toFixed(prec);
-    crd.y0 = crd.y0.plus(dtcy).toFixed(prec);
-    crd.y1 = crd.y1.plus(dtcy).toFixed(prec);
+    crd.x0 = crd.x0.plus(dtcx);
+    crd.x1 = crd.x1.plus(dtcx);
+    crd.y0 = crd.y0.plus(dtcy);
+    crd.y1 = crd.y1.plus(dtcy);
     dropSetP();
   }
 }
 
-function getCenter(crd) {
-  let ctr;
+function getCenter() {
+  let ctr = { }
+    , crd = coords[coords.length-1];
+
   if (!P) {
-    ctr = {};
     ctr.x = (crd.x0 + crd.x1)/2;
     ctr.y = (crd.y0 + crd.y1)/2;
   }else{
-    ctr = {};
-    ctr.x = crd.x0.plus(crd.x1).div(2.0);
-    ctr.y = crd.y0.plus(crd.y1).div(2.0);
+    ctr.x = crd.x0.plus(crd.x1).div(2);
+    ctr.y = crd.y0.plus(crd.y1).div(2);
   }
   return ctr;
 }
 
 function zoom(i) {
-  let crd = coords[coords.length -1];
+  let crd = coords[coords.length -1]
+    , ctr = getCenter();
   if (!P) {
-    let ctr = getCenter(crd);
     ctr.xd = (crd.x1 - crd.x0)/i;
     ctr.yd = (crd.y0 - crd.y1)/i;
     crd.x0 = ctr.x - ctr.xd;
     crd.x1 = ctr.x + ctr.xd;
     crd.y0 = ctr.y + ctr.yd;
     crd.y1 = ctr.y - ctr.yd;
+    if (Math.abs((crd.x1 - crd.x0)/(crd.y0 - crd.y1) - width/height) > 0.01) {
+      switchP();
+      alert('switched to high precision, the speed will drop significantly :\(');
+      return ;
+    }
     dropSet();
   }else{
-    let ctr = getCenter(crd);
+    let crd = coords[coords.length-1];
+    coords.push({ x0: new BigNumber(crd.x0),
+                  x1: new BigNumber(crd.x1),
+                  y0: new BigNumber(crd.y0),
+    		          y1: new BigNumber(crd.y1)});
+    crd = coords[coords.length-1];
+    var p = crd.x1.toString().length;
+    setPrecision(p);
     ctr.xd = crd.x1.minus(crd.x0).div(i);
     ctr.yd = crd.y0.minus(crd.y1).div(i);
-    crd.x0 = ctr.x.minus(ctr.xd);
-    crd.x1 = ctr.x.plus(ctr.xd);
-    crd.y0 = ctr.y.plus(ctr.yd);
-    crd.y1 = ctr.y.minus(ctr.yd);
+    var crd_x0 = ctr.x.minus(ctr.xd)
+      , crd_x1 = ctr.x.plus(ctr.xd)
+      , crd_y0 = ctr.y.plus(ctr.yd)
+      , crd_y1 = ctr.y.minus(ctr.yd)
+
+    coords.push({x0: crd_x0, x1: crd_x1, y0: crd_y0, y1: crd_y1});
+    let delta =  crd.x1.minus(crd.x0).div(crd.y0.minus(crd.y1)).minus(width/height).toFixed(3);
+    if (Math.abs(Number(delta))>0.001 ) {
+      prec+=2;
+      setPrecision(prec);
+    }
     dropSetP();
   }
 }
 
-function switchP() {
+function switchP(draw) {
   if (!P) {
     degrad = 30;
     workers = 64;
     if (!prec) prec = 17;
-    setupP();
+    setupP(draw);
   }else{
     degrad = 10;
     workers = 8;
@@ -152,9 +170,15 @@ function switchP() {
   }
   P = !P;
 }
-function setPrecision(p){BigNumber.set({DECIMAL_PLACES:p})}
+
+function setPrecision(p){
+  BigNumber.set({DECIMAL_PLACES:p})
+  prec = p;
+}
+
 function stopCalc(){stop = true}
 function makeSet() {
+  destination = false;
   if (julia&&!jPo) {
     jPo = {};
     jPo.x = currentX;
@@ -314,7 +338,7 @@ function drawRect(delta, val, bound, x, y){
 
 
 
-function setupP() {
+function setupP(draw) {
   BigNumber.set({ DECIMAL_PLACES: prec });
   let crd = coords[coords.length-1];
   coords.push({ x0: new BigNumber(crd.x0),
@@ -322,10 +346,13 @@ function setupP() {
                 y0: new BigNumber(crd.y0),
   		          y1: new BigNumber(crd.y1)});
   createControlsP();
-  dropSetP();
+  if (draw) {
+    dropSetP();
+  }
 }
 
 function makeSetP() {
+  destination = false;
   if (julia&&!jPo) {
     jPo = {};
     jPo.x = currentX;
@@ -415,7 +442,5 @@ function mapFloat(a, b, c, d, e){
   let s1 = new BigNumber(d);
   let e1 = new BigNumber(e);
   let v = new BigNumber(a);
-  //return new BigNumber( new BigNumber(v.minus(s0).toFixed(prec)).div( new BigNumber(e0.minus(s0).toFixed(prec))).times( new BigNumber(e1.minus(s1).toFixed(prec))).plus(s1).toFixed(prec));
   return new BigNumber(v.minus(s0).div(e0.minus(s0)).times(e1.minus(s1)).plus(s1).toFixed(prec));
 }
-
