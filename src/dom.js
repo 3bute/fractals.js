@@ -207,7 +207,7 @@ document.addEventListener("keydown", event => {
       let p = document.createElement("p");
       dev0.appendChild(p);
     }
-    switchP();
+    switchP(true);
     return ;
   }
   if (event.keyCode == 87){
@@ -293,8 +293,8 @@ function createControls() {
     if (event.button == 1) {
       midbutton = true;
       if (coords.length > 1) coords.pop();
-      if (ed>1) zoomed -= scl;
-      if (P) dropSetP();
+      if (zoomed>1) zoomed -= scl;
+      if (P && coords[coords.length-1].x0.toString().length>16) dropSetP();
       else dropSet();
       setTimeout(() => (midbutton = false), 500);
     }
@@ -510,7 +510,7 @@ function updateInformation(currentX, currentY) {
       Math.round(height / degrad)+"</span>";
     dev0.children[3].innerHTML = "<span>Iterations: " + iter + "</span>";
     dev0.children[4].innerHTML = "<span>Magnifier: " + scl + "</span>";
-    dev0.children[5].innerHTML = "<span>ed in: " + zoomed + "</span>";
+    dev0.children[5].innerHTML = "<span>Zoomed in: " + zoomed + "</span>";
     dev0.children[6].innerHTML = "<span>Saturation: " + sat + "</span>";
     dev0.children[7].innerHTML = "<span>Delta Hue: " + Hue + "</span>";
     dev0.children[8].innerHTML = "<span>Value: " + Value + "</span>";
