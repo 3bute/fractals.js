@@ -187,25 +187,31 @@ function makeSet() {
     return ;
   }
   zoomed += scl;
-  let crd = coords[coords.length - 1];
-  let xstt = crd.x0;
-  let xend = crd.x1;
-  let ystt = crd.y0;
-  let h = height / scl,
-      w = width / scl;
-  let xlen = crd.x1 - crd.x0;
-  let ylen = (xlen * h) / w;
-  let yend = ystt - ylen;
-  crd.y1 = yend;
-  xstt = map(ax, 0, width, crd.x0, crd.x1);
-  ystt = map(ay, 0, height, crd.y0, crd.y1);
-  xend = map(ax + w, 0, width, crd.x0, crd.x1);
-  yend = map(ay + h, 0, height, crd.y0, crd.y1);
+
+  let crd = coords[coords.length - 1]
+    , xstt = Number(crd.x0)
+    , xend = Number(crd.x1)
+    , ystt = Number(crd.y0)
+    , yend = 0
+    , h = height / scl
+    , w = width / scl
+    , xlen = Number(crd.x1) - Number(crd.x0)
+    , ylen = (xlen * h) / w;
+
+  yend = ystt - ylen;
+  crd.y1= yend;
+
+  xstt = map(ax, 0, width, Number(crd.x0), Number(crd.x1));
+  ystt = map(ay, 0, height, Number(crd.y0), Number(crd.y1));
+  xend = map(ax + w, 0, width, Number(crd.x0), Number(crd.x1));
+  yend = map(ay + h, 0, height, Number(crd.y0), Number(crd.y1));
+
   if (Math.abs((xend - xstt)/(ystt - yend) - width/height) > 0.01) {
     switchP(true);
     alert('switched to high precision, the speed will drop significantly :\(');
     return ;
   }
+
   coords.push({ x0: xstt, y0: ystt, x1: xend, y1: yend });
   dropSet();
 }
@@ -213,10 +219,10 @@ function makeSet() {
 function dropSet() {
   getPoints(
     iter,
-    coords[coords.length - 1].x0,
-    coords[coords.length - 1].y0,
-    coords[coords.length - 1].x1,
-    coords[coords.length - 1].y1
+    Number(coords[coords.length - 1].x0),
+    Number(coords[coords.length - 1].y0),
+    Number(coords[coords.length - 1].x1),
+    Number(coords[coords.length - 1].y1)
   );
 }
 

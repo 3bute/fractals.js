@@ -294,8 +294,11 @@ function createControls() {
       midbutton = true;
       if (coords.length > 1) coords.pop();
       if (zoomed>1) zoomed -= scl;
-      if (P && coords[coords.length-1].x0.toString().length>16) dropSetP();
-      else dropSet();
+      if (P && coords[coords.length-1].x0.toString().length>16) {
+        dropSetP();
+      } else {
+        dropSet();
+      }
       setTimeout(() => (midbutton = false), 500);
     }
   });
