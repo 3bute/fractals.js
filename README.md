@@ -5,7 +5,7 @@ https://fract.glitch.me
 
 Enjoy patterns of nature! The viewer provides minimalistic design, intuitive functionality and easy to use interface. 
 
-**Check out client-server GMP arbitrary precision implementation! Currently only POSIX-compatible**
+**Check out [client-server GMP arbitrary precision implementation](https://github.com/3bute/CFractals)! Currently only POSIX-compatible**
 
 You will also need next things to be set up:
 - C compiler with libgmp, libmicrohttpd and libpthread
